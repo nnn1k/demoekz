@@ -43,9 +43,6 @@ def create_form(
                 pass
     return object_list
 
-def swap_windows(win1: tk.Tk, win2: tk.Tk):
-    win1.withdraw()
-    win2.deiconify()
 
 def authenticate():
     login = auth_win.auth_object[0].get()
@@ -54,7 +51,8 @@ def authenticate():
         if user['login'] == login and user['password'] == password:
             global user_id
             user_id = id
-            swap_windows(auth_win, admin_win)
+            auth_win.withdraw()
+            admin_win.deiconify()
 
 
 def print_applications():
@@ -69,7 +67,6 @@ def add_application():
     application.append(datetime.datetime.now())
     for item in admin_win.admin_object:
         application.append(item.get())
-    #application.append(users[user_id].get('login'))
     application.append('')
     admin_win.applications.append(application)
     print_applications()
