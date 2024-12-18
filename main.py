@@ -9,7 +9,7 @@ users = [
     {'login': 'worker', 'password': 'worker'},
     {'login': '1', 'password': '1'},
 ]
-
+user_id = 0
 ENTRY_WIDTH = 20
 BUTTON_WIDTH = 15
 
@@ -50,9 +50,12 @@ def swap_windows(win1: tk.Tk, win2: tk.Tk):
 def authenticate():
     login = auth_win.auth_object[0].get()
     password = auth_win.auth_object[1].get()
-    for user in users:
+    for id, user in enumerate(users):
         if user['login'] == login and user['password'] == password:
+            global user_id
+            user_id = id
             swap_windows(auth_win, admin_win)
+
 
 def print_applications():
     admin_win.tree.delete(*admin_win.tree.get_children())
@@ -66,6 +69,8 @@ def add_application():
     application.append(datetime.datetime.now())
     for item in admin_win.admin_object:
         application.append(item.get())
+    #application.append(users[user_id].get('login'))
+    application.append('')
     admin_win.applications.append(application)
     print_applications()
 
@@ -106,19 +111,26 @@ class AdminWindow(tk.Tk):
             ('Статус заявки', 'combobox', ('Новая', 'В работе', 'Завершена')),
             ('Добавить заявку', 'button', add_application),
             ('Изменить заявку', 'button', update_application),
+            ('Ответственный', 'combobox', [user.get('login') for user in users]),
+            ('Комментарий', 'entry', ())
+
         ]
 
         columns = [
             'Номер техники', 'Дата добавления',
             'Вид оргтехники', 'Модель',
             'Описание проблемы', 'ФИО клиента',
-            'Номер телефона', 'Статус заявки'
+            'Номер телефона', 'Статус заявки',
+            'Исполнитель', 'Комментарий'
         ]
+
         self.applications = []
         self.id_generator = generator_func(1, 1)
         self.tree = ttk.Treeview(self, columns=columns, show='headings', height=30)
-        for i in columns:
-            self.tree.heading(i, text=i)
+        for index, el in enumerate(columns):
+            self.tree.column(index, width=150)
+            self.tree.heading(el, text=el)
+
         self.tree.place(x=200, y=20)
         self.admin_object = create_form(self, 10, admin_object_list, generator_func(50, 30))
 
