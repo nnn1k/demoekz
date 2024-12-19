@@ -1,7 +1,7 @@
 import datetime
 import tkinter as tk
 from tkinter import ttk
-from tkinter.messagebox import showinfo
+from tkinter.messagebox import showinfo, showerror
 from typing import List, Tuple
 
 users = [
@@ -51,8 +51,12 @@ def authenticate():
         if user['login'] == login and user['password'] == password:
             global user_id
             user_id = id
+            auth_win.auth_object[0].delete(0, tk.END)
+            auth_win.auth_object[1].delete(0, tk.END)
             auth_win.withdraw()
             admin_win.deiconify()
+            return
+    showerror('error', 'Неправильный логин или пароль')
 
 
 def print_applications():
@@ -79,16 +83,20 @@ def update_application():
 
     print_applications()
 
+def leave():
+    admin_win.withdraw()
+    auth_win.deiconify()
 
 class AuthWindow(tk.Tk):
     def __init__(self):
         super().__init__()
 
         self.geometry('600x400')
+        self.title('Авторизация')
 
         auth_form_object_list = [
-            ('Логин', 'entry', ()),
-            ('Пароль', 'entry', ()),
+            ('Логин', 'entry', None),
+            ('Пароль', 'entry', None),
             ('Войти', 'button', authenticate)
         ]
 
@@ -98,18 +106,19 @@ class AdminWindow(tk.Tk):
     def __init__(self):
         super().__init__()
         self.geometry('1820x800+10+10')
+        self.title('Окно работника')
 
         admin_object_list = [
-            ('Вид оргтехники', 'entry', ()),
-            ('Модель', 'entry', ()),
-            ('Описание проблемы', 'entry', ()),
-            ('ФИО клиента', 'entry', ()),
-            ('Номер телефона', 'entry', ()),
+            ('Вид оргтехники', 'entry', None),
+            ('Модель', 'entry', None),
+            ('Описание проблемы', 'entry', None),
+            ('ФИО клиента', 'entry', None),
+            ('Номер телефона', 'entry', None),
             ('Статус заявки', 'combobox', ('Новая', 'В работе', 'Завершена')),
             ('Добавить заявку', 'button', add_application),
             ('Изменить заявку', 'button', update_application),
             ('Ответственный', 'combobox', [user.get('login') for user in users]),
-            ('Комментарий', 'entry', ())
+            ('Комментарий', 'entry', None)
 
         ]
 
@@ -121,6 +130,8 @@ class AdminWindow(tk.Tk):
             'Исполнитель', 'Комментарий'
         ]
 
+        tk.Label(self, text='Компания').place(x=0, y=0)
+        tk.Button(self, text='Выйти', command=leave).place(x=1750, y=10)
         self.applications = []
         self.id_generator = generator_func(1, 1)
         self.tree = ttk.Treeview(self, columns=columns, show='headings', height=30)
